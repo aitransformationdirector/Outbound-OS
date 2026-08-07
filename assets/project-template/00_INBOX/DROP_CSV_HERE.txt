@@ -1,0 +1,4 @@
+Place exactly one source CSV in this folder before starting a new campaign.
+
+After a successful bootstrap, the original is copied unchanged into the campaign folder. The inbox copy is not deleted automatically.
+

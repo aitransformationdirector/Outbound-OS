@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Public provider evidence profile",
+  "type": "object",
+  "required": ["campaign_id", "provider_name", "status", "checked_at", "signals", "copy_rule"],
+  "properties": {
+    "campaign_id": {"type": "string"},
+    "provider_name": {"type": "string"},
+    "status": {"type": "string", "enum": ["current_profile", "partial_profile", "unknown"]},
+    "checked_at": {"type": "string"},
+    "official_urls": {"type": "array", "items": {"type": "string", "format": "uri"}},
+    "signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["signal", "signal_type", "source_url", "what_it_proves", "what_it_does_not_prove"],
+        "properties": {
+          "signal": {"type": "string"},
+          "signal_type": {"type": "string"},
+          "source_url": {"type": "string", "format": "uri"},
+          "what_it_proves": {"type": "string"},
+          "what_it_does_not_prove": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "copy_rule": {"type": "string"},
+    "managed_partner_motion": {
+      "type": "object",
+      "properties": {
+        "status": {"type": "string", "enum": ["supported", "partial", "unverified"]},
+        "publisher_ask": {"type": ["string", "null"]},
+        "tiki_follow_through": {"type": ["string", "null"]},
+        "evidence_urls": {"type": "array", "items": {"type": "string", "format": "uri"}},
+        "constraints": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "gaps": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

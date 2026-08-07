@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Normalized source candidate",
+  "type": "object",
+  "required": ["campaign_id", "candidate_id", "source_row_id", "publisher_url", "hostname", "input_monthly_pageviews", "status"],
+  "properties": {
+    "campaign_id": {"type": "string"},
+    "candidate_id": {"type": "string"},
+    "source_row_id": {"type": "string"},
+    "publisher_url": {"type": "string"},
+    "hostname": {"type": "string"},
+    "publisher_name": {"type": ["string", "null"]},
+    "input_monthly_pageviews": {"type": ["integer", "null"], "minimum": 0},
+    "input_category": {"type": ["string", "null"]},
+    "input_country": {"type": ["string", "null"]},
+    "source_provider_signal": {"type": ["string", "null"]},
+    "source_contact_tokens": {"type": "array", "items": {"type": "string"}},
+    "status": {"type": "string", "enum": ["unclassified", "eligible", "below_threshold", "unknown_traffic", "unknown_geography", "excluded", "failed"]},
+    "filter_reason": {"type": ["string", "null"]},
+    "source_row": {"type": "object"}
+  },
+  "additionalProperties": false
+}

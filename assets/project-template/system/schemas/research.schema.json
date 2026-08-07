@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Publisher research result",
+  "type": "object",
+  "required": ["campaign_id", "account_id", "provider_status", "provider_evidence", "route_type", "route_status", "evidence_urls", "research_gaps", "checked_at", "completion_status"],
+  "properties": {
+    "campaign_id": {"type": "string"},
+    "account_id": {"type": "string"},
+    "provider_status": {"type": "string", "enum": ["current_signal", "recent_signal", "removed", "absent", "unknown"]},
+    "provider_evidence": {"type": "string"},
+    "provider_evidence_url": {"type": ["string", "null"]},
+    "on_page_ads_status": {"type": "string", "enum": ["observed", "not_observed", "mixed_or_conditional", "blocked", "unknown"]},
+    "contact_name": {"type": ["string", "null"]},
+    "contact_title": {"type": ["string", "null"]},
+    "contact_email": {"type": ["string", "null"]},
+    "contact_phone": {"type": ["string", "null"]},
+    "contact_profile_url": {"type": ["string", "null"], "format": "uri"},
+    "favicon_url": {"type": ["string", "null"], "format": "uri"},
+    "monthly_unique_visitors": {"type": ["integer", "null"], "minimum": 0},
+    "monthly_unique_scope": {"type": ["string", "null"]},
+    "route_type": {"type": "string", "enum": ["direct_email", "role_email", "commercial_form", "profile", "commercial_phone", "none"]},
+    "route_url": {"type": ["string", "null"]},
+    "route_status": {"type": "string", "enum": ["actionable", "unusable", "not_found", "conflict"]},
+    "why_this_route": {"type": "string"},
+    "evidence_urls": {"type": "array", "items": {"type": "string", "format": "uri"}},
+    "research_gaps": {"type": "array", "items": {"type": "string"}},
+    "checked_at": {"type": "string"},
+    "completion_status": {"type": "string", "enum": ["completed", "excluded", "held", "failed"]}
+  },
+  "additionalProperties": false
+}

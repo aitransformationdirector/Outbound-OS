@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Canonical publisher account",
+  "type": "object",
+  "required": ["campaign_id", "account_id", "publisher_name", "publisher_brand", "canonical_domain", "portfolio_domains", "candidate_ids", "ownership_status", "disposition_status"],
+  "properties": {
+    "campaign_id": {"type": "string"},
+    "account_id": {"type": "string"},
+    "publisher_name": {"type": "string"},
+    "publisher_brand": {"type": "string", "minLength": 1},
+    "canonical_domain": {"type": "string"},
+    "publisher_url": {"type": "string"},
+    "parent_company": {"type": ["string", "null"]},
+    "portfolio_domains": {"type": "array", "items": {"type": "string"}},
+    "candidate_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "ownership_status": {"type": "string", "enum": ["verified", "probable", "standalone", "unresolved"]},
+    "ownership_evidence_urls": {"type": "array", "items": {"type": "string", "format": "uri"}},
+    "disposition_status": {"type": "string", "enum": ["active", "excluded", "held", "failed"]},
+    "disposition_reason": {"type": ["string", "null"]},
+    "max_monthly_pageviews": {"type": ["integer", "null"], "minimum": 0},
+    "monthly_unique_visitors": {"type": ["integer", "null"], "minimum": 0},
+    "monthly_unique_scope": {"type": ["string", "null"]},
+    "favicon_url": {"type": ["string", "null"], "format": "uri"},
+    "classifications": {"type": "array", "items": {"type": "string"}},
+    "smoke_selected": {"type": "boolean"}
+  },
+  "additionalProperties": false
+}

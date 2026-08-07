@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VisualizeMe feedback",
+  "type": "object",
+  "required": ["schema_version", "review_id", "status", "items"],
+  "properties": {
+    "schema_version": {"type": "integer", "const": 1},
+    "review_id": {"type": "string"},
+    "status": {"type": "string", "enum": ["draft", "submitted"]},
+    "overall_comment": {"type": "string"},
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "decision"],
+        "properties": {
+          "id": {"type": "string"},
+          "decision": {"type": "string", "enum": ["approved", "needs_changes", "hold", "excluded", "pending"]},
+          "comment": {"type": "string"},
+          "fields": {"type": "object"}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}
+

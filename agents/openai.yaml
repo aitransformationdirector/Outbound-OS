@@ -1,0 +1,6 @@
+interface:
+  display_name: "SSP Publisher Outreach Showcase"
+  short_description: "Build a Pipeline-free publisher outreach project"
+  default_prompt: "Use $ssp-publisher-outreach-showcase to create a ready-to-run publisher outreach project without downstream Pipeline integrations."
+policy:
+  allow_implicit_invocation: true

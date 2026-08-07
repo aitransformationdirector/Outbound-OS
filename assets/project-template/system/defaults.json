@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "project_name": "Codex SSP Outreach",
+  "timezone": "Europe/London",
+  "outreach_company": "TIKI",
+  "sender_name": "Dean",
+  "sender_email": "dean@tiki.com",
+  "selection": {
+    "minimum_monthly_pageviews": 50000,
+    "target_verticals": [
+      "travel",
+      "travel_adjacent",
+      "travel_section"
+    ],
+    "target_geographies": [],
+    "geography_filter_mode": "none",
+    "include_unknown_traffic": false,
+    "negative_audit_sample_size": 10
+  },
+  "research": {
+    "public_web_only": true,
+    "current_evidence_only": true,
+    "batch_size": 6,
+    "max_route_attempts_per_account": 3,
+    "verify_material_exceptions_only": true
+  },
+  "outreach": {
+    "first_touch_channels": [
+      "email",
+      "manual_commercial_form"
+    ],
+    "word_count_min": 60,
+    "word_count_max": 120,
+    "smoke_test_accounts": 3,
+    "proof_points": [
+      "TIKI works directly with tourism boards and global travel brands."
+    ],
+    "primary_route": "Incremental TIKI travel-focused demand through the publisher's existing advertising setup.",
+    "secondary_route": "A separate TIKI-owned format running alongside the publisher's existing setup.",
+    "create_gmail_drafts_after_full_approval": true,
+    "send_email": false,
+    "submit_forms": false
+  },
+  "review": {
+    "planned_human_gates": [
+      "smoke_review",
+      "full_review"
+    ],
+    "smoke_review_size": 3,
+    "full_review_includes_execution_preflight": true,
+    "one_click_exclude": true
+  },
+  "suppression_memory": {
+    "path": "../_shared/suppression-memory.jsonl",
+    "write_policy": "dean_confirmed_only",
+    "allowed_reasons": [
+      "prior_relationship",
+      "unsuccessful_outreach",
+      "opt_out",
+      "colleague_owned"
+    ]
+  }
+}

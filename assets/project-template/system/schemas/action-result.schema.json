@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Authorized external or manual action result",
+  "type": "object",
+  "required": ["action_id", "campaign_id", "account_id", "action_type", "status", "authorized_by_approval_id", "updated_at"],
+  "properties": {
+    "action_id": {"type": "string"},
+    "campaign_id": {"type": "string"},
+    "account_id": {"type": "string"},
+    "action_type": {"type": "string", "enum": ["gmail_draft", "manual_route"]},
+    "status": {"type": "string", "enum": ["authorized", "created", "queued", "done", "held", "failed", "suppressed"]},
+    "authorized_by_approval_id": {"type": "string"},
+    "external_id": {"type": ["string", "null"]},
+    "external_url": {"type": ["string", "null"]},
+    "hold_reason": {"type": ["string", "null"]},
+    "completed_at": {"type": ["string", "null"]},
+    "error": {"type": ["string", "null"]},
+    "updated_at": {"type": "string"}
+  },
+  "additionalProperties": false
+}
