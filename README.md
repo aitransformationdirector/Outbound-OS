@@ -237,9 +237,6 @@ Outbound-OS/
 
 ## Limitations
 
-- The offline test does not run public research, Gmail, VisualizeMe, connector permission flows, or a real Codex campaign task.
-- The repository does not bundle a rendered review, manual-queue interface, or browser test for the documented controls.
-- Ownership, contact-route, provider, and traffic evidence can be incomplete or stale; the workflow contract requires a safer held/no-action state when evidence is insufficient.
 - Human-gate enforcement ultimately depends on the host environment and the integrity of submitted review feedback.
 - Shared suppression memory is intentional cross-campaign state and must contain only confirmed facts.
 - The static validator checks named prohibited downstream paths; it is not a proof that every possible integration is absent.
