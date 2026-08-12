@@ -3,7 +3,7 @@ name: ssp-publisher-outreach-showcase
 description: Create a new, self-contained Codex SSP publisher-research and outbound project from a CSV, a named ad manager or SSP, and optional traffic, vertical, and geography criteria. Use when demonstrating or running the two-review publisher outreach workflow through approved Gmail drafts and local manual follow-up actions. This showcase edition excludes downstream CRM, Publisher Pipeline exports, scheduled follow-up syncs, and production integrations.
 ---
 
-# SSP Publisher Outreach Showcase
+# Outbound OS
 
 Create a provider-neutral Codex project from the bundled template. Configure it from the initial request, validate it, and stop before research begins.
 
