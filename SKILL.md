@@ -1,143 +1,74 @@
 ---
-name: ssp-publisher-outreach-showcase
-description: Create a new, self-contained Codex SSP publisher-research and outbound project from a CSV, a named ad manager or SSP, and optional traffic, vertical, and geography criteria. Use when demonstrating or running the two-review publisher outreach workflow through approved Gmail drafts and local manual follow-up actions. This showcase edition excludes downstream CRM, Publisher Pipeline exports, scheduled follow-up syncs, and production integrations.
+name: outbound-os
+description: Create the canonical universal Outbound OS campaign from an account list or spreadsheet, a targeting brief, and confirmed inclusion, exclusion, and prioritization rules. Use for first-run onboarding or a new campaign; do not use to execute an already-created campaign.
 ---
 
 # Outbound OS
 
-Create a provider-neutral Codex project from the bundled template. Configure it from the initial request, validate it, and stop before research begins.
+Create a neutral, self-contained Outbound OS project. Do not assume an industry, account type, size metric, geography, seller, or email provider.
 
-## Explain the two-phase setup
+## Start list-first
 
-At the beginning of the first response, tell the user that setup has two phases:
+Inspect the message and attachments. If the user has not supplied the full intake, read [references/guided-intake.md](references/guided-intake.md), start with its welcome and support line exactly as written, prefill known information, and ask for the remainder in one compact message. Keep the example attached to every unanswered intake question; do not shorten the form into category labels without examples.
 
-1. **Build and seed:** this skill collects the short intake, creates a unique self-contained folder under `~/Desktop/Codex/SSP Projects/`, and validates it.
-2. **Open and run:** after the build, the user adds the exact generated `<unique-project-name>` folder as a local Codex project, starts a new task inside it, and types `run`.
+Accept:
 
-Make clear that the user should not create an empty campaign project beforehand and must not select the shared `SSP Projects` parent folder. Keep this explanation brief, then continue with the guided intake.
+- CSV, TSV, or XLSX attachments;
+- a pasted list with at least an account name or website per row;
+- a connected Google Sheet. Use the Google Sheets connection to obtain the selected range and preserve a local source snapshot. If the connection is unavailable, request an XLSX or CSV export without restarting the intake.
 
-## Collect the launch values
+Never guess an ambiguous account identity or website. Missing websites may be researched later; ambiguous matches remain `needs_review`.
 
-First inspect the current message and attachments. Extract:
+Once the user supplies or confirms `team_profile.user_name`, address them by that name at least once in every subsequent user-facing response. Keep the name in the confirmed brief and reusable profile; do not infer it from an email address.
 
-- required CSV path;
-- required SSP/ad-manager name;
-- minimum monthly traffic, default `50000`;
-- target verticals, default `travel,travel_adjacent`;
-- optional geographies and one-line note;
-- optional project label.
+## Audit before building
 
-If this is the first invocation and any launch value is absent, do not build yet. Read `references/guided-intake.md`, show its compact guided form with known values prefilled, and wait for the user's reply. Ask for every remaining launch choice in that one message so the user does not need to remember the input format.
+Run `scripts/build_project.py audit --source <path> --context <campaign-context>` after resolving the source into a local file. Report totals, duplicates, unusable rows, missing names or websites, and available columns.
 
-- Detect an attached CSV automatically; do not ask the user to type its filesystem path when an attachment is available.
-- Show the threshold, vertical, and geography defaults explicitly.
-- Let the user reply `use defaults` for all optional choices.
-- On later replies, ask only for required information that is still missing or for a supplied invalid threshold.
-- Never infer the CSV or ad-manager name.
+Translate the targeting description into explicit rules using [references/campaign-contract.md](references/campaign-contract.md):
 
-After the guided intake is complete, use the confirmed values. Read `references/input-contract.md` when resolving aliases, paths, or collision behavior.
+- `must_match` for mandatory eligibility;
+- `exclude` for disqualifiers;
+- `prioritize` for ranking signals.
 
-## Build
+Ask only when the difference materially affects eligibility. Unknown evidence for a hard rule defaults to `needs_review`, never exclusion.
 
-Run `scripts/build_project.py` with the resolved values. The default destination is:
+## Recommend filters, then confirm
 
-`~/Desktop/Codex/SSP Projects/<provider-date>/`
+Recommend only filters relevant to the goal, account definition, source columns, and likely public evidence. Show each recommendation's rationale, evidence requirement, and expected coverage. Suggestions remain inactive until accepted.
 
-Request the normal scoped filesystem approval if the destination is outside the active writable project. Do not broaden the destination or overwrite an existing project.
+Present the final brief with source, goal, offer, account totals, all three rule groups, accepted suggestions, channels, and unresolved items. End with:
 
-Example:
+> Do you want Outbound OS to apply any other filtering before I create the campaign? You can accept, remove, or edit any of the rules above.
+
+Do not build until the user confirms the brief.
+
+## Build the project
+
+Create a temporary JSON brief conforming to `references/campaign-contract.md`, then run:
 
 ```bash
-python3 "<skill-dir>/scripts/build_project.py" \
-  --source "<csv-path>" \
-  --provider "ExampleManager" \
-  --minimum-monthly-traffic "50k" \
-  --verticals "travel,travel_adjacent"
+python3 "<skill-dir>/scripts/build_project.py" build \
+  --source "<resolved-source-path>" \
+  --brief "<confirmed-brief.json>"
 ```
 
-Pass `--geographies`, `--note`, or `--project-label` only when supplied. The script must:
-
-1. copy the provider-neutral asset template transactionally;
-2. update project defaults and user-facing launch files;
-3. preserve and audit the CSV with the campaign engine;
-4. write `PROJECT_INPUT.json` and `BUILD_RECEIPT.json`;
-5. validate the project and campaign;
-6. return JSON containing `project_path`, `campaign_id`, `resumed`, and `next_prompt`.
-
-Treat a nonzero exit as a build failure. Report the exact error and leave no half-created project.
-
-## Preserve the full-review UX contract
-
-The bundled project template must carry these requirements into every generated project's `AGENTS.md` and `$run-ssp-outreach` skill:
-
-- Every full-review card shows one concise, evidence-grounded line explaining what the site or verified publisher group is about.
-- Every card shows the source estimate for the canonical site's monthly traffic. Label it as estimated monthly pageviews, not unique visitors.
-- When current public evidence verifies common ownership of multiple in-scope sites, also show the combined group estimate by summing the source monthly-pageview estimates for the consolidated portfolio members. Keep the site estimate and group total separate, list the included domains in the detail view, and never infer missing traffic or ownership.
-- Put one-click `Approve shown action` and `Exclude` controls directly on every card. Opening the detailed review remains optional and is used for evidence, exact copy, notes, `Needs changes`, and other decisions.
-- Show the same description and traffic facts in the detail view, preserve stable account IDs and prior decisions across rebuilt rounds, and validate the enhanced review before serving it.
-- Use plain user-facing language for manual routes, such as `Add to manual follow-up list`; avoid internal phrases such as `manual-action queue`.
-
-When the VisualizeMe default card template does not expose these fields or quick decisions, the generated project must prepare and serve a campaign-local VisualizeMe template that does. Keep it bound to `127.0.0.1` and preserve the normal VisualizeMe feedback schema.
-
-## Preserve execution-quality contracts
-
-Every generated project must carry these requirements into `AGENTS.md`, the
-`$run-ssp-outreach` skill, its schemas, and deterministic validation:
-
-- **One canonical copy record:** Store one versioned copy record per account and
-  review stage. Its publisher brand, subject, plain-text body, and paragraph
-  breaks must feed the review, Gmail draft intent, and manual route output
-  without channel-specific rewriting. Validate derived outputs against it.
-- **Natural publisher brand:** Keep `canonical_domain`, publisher/account
-  identity, and reader-facing `publisher_brand` separate. Resolve and validate
-  the natural brand before the smoke review; never expose a URL suffix as the
-  brand unless it is genuinely part of the public brand.
-- **Production-ready manual queue:** For every approved non-email route, provide
-  the direct route, subject when applicable, preformatted paragraph-preserving
-  copy, a working one-click `Copy` control, `Done` and `Hold` controls, created
-  and updated timestamps, and a required reason when held. Keep all actions
-  local until Dean performs and confirms them.
-- **Continuous progress reporting:** During automatic work, report the current
-  stage, completed and remaining counts, and the next automatic step at each
-  material checkpoint and at least once per 60 seconds during long-running
-  work. Continue automatically between the two planned gates; do not require
-  `continue` messages.
-- **Mailbox drift checks:** Re-list the exact campaign draft set immediately
-  before any authorized Gmail draft creation or edit. Reconcile recipients,
-  subjects, draft IDs, and a checked timestamp; suppress duplicates and block
-  only affected items on unexpected drift. This does not authorize sending.
-- **Persistent suppression memory:** Use the shared project-family suppression
-  registry for Dean-confirmed prior relationships, opt-outs, colleague-owned
-  accounts, and unsuccessful prior outreach. Load it before smoke selection and
-  merge it with campaign-local Gmail suppression without weakening evidence or
-  campaign-isolation rules. Only confirmed facts may update the shared registry.
-
-## Preserve the showcase boundary
-
-Every generated project must stop after the approved Gmail-draft and local
-manual-follow-up actions are reconciled and validated.
-
-- Do not install or invoke a scheduled follow-up task.
-- Do not create CRM state, opportunity exports, Pipeline bundles, shared
-  handoffs, or production-import instructions.
-- Do not include downstream systems in the completion criteria.
-- Finish with final action counts, validation status, and campaign-local paths.
+The default destination is `~/Desktop/Codex/Outbound OS Projects/<campaign-name-date>/`. Request scoped filesystem approval when needed. The builder is transactional, preserves the original input, saves reusable non-secret team defaults, creates neutral account records, and validates the generated project.
 
 ## Handoff
 
-Do not start publisher research, browse sites, read Gmail, build a VisualizeMe review, or create drafts in this builder task.
+Do not begin account research or create mailbox drafts in the builder task. After a successful build, address the user by name and label the response `Phase 2 — open the generated project`.
 
-After a successful build, label the handoff **Phase 2 — open and run** and give the user:
+Show the clickable exact generated folder, its full path, counts, confirmed rules, and selected channels. Then give these instructions without shortening them:
 
-- the clickable project folder;
-- the effective provider, threshold, verticals, and geographies;
-- the parsed and eligible source counts;
-- the exact generated folder path returned as `project_path`;
-- these specific Codex instructions:
-  1. open **Projects** and choose **Add local project**;
-  2. select the exact generated `<unique-project-name>` folder shown in `project_path`;
-  3. do not select its shared `SSP Projects` parent;
-  4. start a new task inside that local project;
-  5. type exactly `run`.
+1. **Do not type `run` in this current builder task.** Do not attach or mention the generated folder here; attaching a folder is not the same as opening a local project.
+2. In Codex, open **Projects** and choose **Add local project**.
+3. In the folder picker, navigate to `Desktop` → `Codex` → `Outbound OS Projects`.
+4. Select the exact generated campaign folder named in `project_folder_name`. Do not select the shared `Outbound OS Projects` parent folder.
+5. Confirm the selected folder contains `AGENTS.md`, `PROJECT_INPUT.json`, and `.agents/skills/run-outbound-campaign/SKILL.md`.
+6. Start a **new task inside that local project**. Verify the task's project/folder is the exact generated campaign folder before continuing.
+7. Type exactly `run` in that new task.
 
-The generated project interprets the exact message `run` as authority to execute the prepared graph. Its only planned human gates are the three-publisher smoke review and the complete post-Gmail-preflight VisualizeMe review.
+If the user types `run` in the builder task, do not execute or fall back to the template. Address them by name and repeat the Phase 2 instructions with the exact generated path.
+
+Nothing in onboarding authorizes sending messages.

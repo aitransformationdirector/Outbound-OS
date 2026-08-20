@@ -1,0 +1,6 @@
+interface:
+  display_name: "Run Outbound Campaign"
+  short_description: "Research, review, and prepare approved outreach"
+  default_prompt: "Use $run-outbound-campaign to run the prepared campaign."
+policy:
+  allow_implicit_invocation: true

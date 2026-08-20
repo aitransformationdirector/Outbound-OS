@@ -1,12 +1,11 @@
-# Prepared launch
+# {{USER_NAME}}, launch this campaign from the local project
 
-When the user types `run`, resume campaign `{{CAMPAIGN_ID}}` using:
+- Campaign: `{{CAMPAIGN_NAME}}`
+- Campaign ID: `{{CAMPAIGN_ID}}`
+- Source: `{{SOURCE_NAME}}`
+- Accounts: `{{ACCOUNT_COUNT}}`
+- Channels: `{{CHANNELS}}`
 
-- source: `{{SOURCE_NAME}}`
-- provider: `{{TARGET_PROVIDER}}`
-- minimum monthly traffic: `{{MINIMUM_MONTHLY_TRAFFIC}}`
-- verticals: `{{TARGET_VERTICALS}}`
-- geographies: `{{TARGET_GEOGRAPHIES}}`
+Before typing `run`, confirm this task is opened inside the exact generated campaign folder and that `.agents/skills/run-outbound-campaign/SKILL.md` exists. Do not run from the original builder task or attach this folder there.
 
-Do not repeat intake questions. Execute until the three-publisher review, then continue automatically after submitted smoke approval until the complete review.
-
+When the correct local project is open, type exactly `run`.
