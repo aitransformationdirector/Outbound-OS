@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["profile_name", "user_name", "organization", "senders", "preferred_channels", "connection_references"],
+  "properties": {
+    "profile_name": {"type": "string", "minLength": 1},
+    "user_name": {"type": "string", "minLength": 1},
+    "organization": {"type": "string", "minLength": 1},
+    "senders": {"type": "array", "items": {"type": "object", "required": ["name"], "properties": {"name": {"type": "string", "minLength": 1}, "email": {"type": ["string", "null"]}}}},
+    "default_offer": {"type": ["string", "null"]},
+    "preferred_channels": {"type": "array", "items": {"enum": ["gmail", "outlook", "manual_export"]}},
+    "connection_references": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

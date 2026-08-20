@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "account_id", "source_row", "canonical_name", "resolution_status", "qualification_status", "original_fields", "evidence"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "account_id": {"type": "string", "pattern": "^acct-"},
+    "source_row": {"type": "integer", "minimum": 1},
+    "supplied_name": {"type": ["string", "null"]},
+    "supplied_website": {"type": ["string", "null"]},
+    "canonical_name": {"type": "string", "minLength": 1},
+    "canonical_domain": {"type": ["string", "null"]},
+    "original_fields": {"type": "object"},
+    "resolution_status": {"enum": ["resolved", "needs_review", "failed"]},
+    "qualification_status": {"enum": ["pending_research", "qualified", "excluded", "needs_review", "failed"]},
+    "priority": {"type": ["number", "null"]},
+    "evidence": {"type": "array"}
+  }
+}

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Sync Outbound CRM"
+  short_description: "Export conversation-backed account records"
+  default_prompt: "Use $sync-outbound-crm to regenerate the campaign CRM export."
+policy:
+  allow_implicit_invocation: true

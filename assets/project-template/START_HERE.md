@@ -1,30 +1,25 @@
-# Ready to run
+# {{USER_NAME}}, your campaign project is ready
 
-This Codex project has been prepared from `{{SOURCE_NAME}}`.
+This Outbound OS project is prepared for **{{CAMPAIGN_NAME}}**.
 
-- SSP/ad manager: `{{TARGET_PROVIDER}}`
-- Minimum monthly traffic: `{{MINIMUM_MONTHLY_TRAFFIC}}`
-- Target verticals: `{{TARGET_VERTICALS}}`
-- Target geographies: `{{TARGET_GEOGRAPHIES}}`
+- Source: `{{SOURCE_NAME}}`
+- Imported accounts: `{{ACCOUNT_COUNT}}`
+- Channels: `{{CHANNELS}}`
 - Campaign ID: `{{CAMPAIGN_ID}}`
 
-## Start
+## Open the correct folder in Codex
 
-1. Open this folder as a local Codex project.
-2. Start or continue a task in this folder.
-3. Type exactly:
+Do not attach this folder to the campaign-builder task, and do not type `run` in that old task. An attachment is not a local project.
 
-   `run`
+1. In Codex, open **Projects** and choose **Add local project**.
+2. Navigate to `Desktop` → `Codex` → `Outbound OS Projects`.
+3. Select this exact campaign folder—the folder containing this `START_HERE.md` file. Do not select the shared `Outbound OS Projects` parent.
+4. Confirm the selected folder contains:
+   - `AGENTS.md`
+   - `PROJECT_INPUT.json`
+   - `.agents/skills/run-outbound-campaign/SKILL.md`
+5. Start a **new task inside this local project**.
+6. Verify the task's project/folder name matches this campaign folder.
+7. Type exactly `run` in that new task.
 
-Codex will execute the prepared graph and pause only for:
-
-1. the three-publisher VisualizeMe smoke review;
-2. the complete VisualizeMe review showing every publisher, exact copy, Gmail-history result, and proposed action.
-
-On the complete review, `Approve shown action` authorizes creation of the exact displayed Gmail draft for an email route. It never authorizes sending. Form, profile, and phone routes stay in the local manual follow-up list and are never submitted automatically.
-
-Campaign files live under `01_CAMPAIGNS`. Review data appears under `02_REVIEW`. Campaign-local reports and manual follow-up outputs appear under `03_OUTPUTS`.
-
-This showcase edition ends after approved Gmail drafts and local manual follow-up actions are reconciled and validated. It does not create downstream CRM records, opportunity exports, scheduled follow-up tasks, or production integrations.
-
-See `ARCHITECTURE.md` for the graph design, safeguards, trade-offs, and limitations.
+The run pauses for a three-account calibration review and a complete action preflight. Approval may create an exact draft or manual follow-up item. It never authorizes sending or submission.

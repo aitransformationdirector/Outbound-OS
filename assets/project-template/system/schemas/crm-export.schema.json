@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["campaign_id", "account_id", "account_name", "relationship_status", "evidence"],
+  "properties": {
+    "campaign_id": {"type": "string"},
+    "account_id": {"type": "string"},
+    "account_name": {"type": "string"},
+    "relationship_status": {"enum": ["substantive_reply", "confirmed_interaction", "qualified_opportunity"]},
+    "evidence": {"type": "array", "minItems": 1}
+  }
+}

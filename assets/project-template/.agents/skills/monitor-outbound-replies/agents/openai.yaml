@@ -1,0 +1,6 @@
+interface:
+  display_name: "Monitor Outbound Replies"
+  short_description: "Check Gmail or Outlook replies read-only"
+  default_prompt: "Use $monitor-outbound-replies to check this campaign for replies."
+policy:
+  allow_implicit_invocation: true

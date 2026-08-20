@@ -1,6 +1,0 @@
-interface:
-  display_name: "Run SSP Outreach"
-  short_description: "Research and prepare SSP publisher outreach"
-  default_prompt: "Use $run-ssp-outreach to process the CSV in 00_INBOX for the named SSP manager."
-policy:
-  allow_implicit_invocation: true

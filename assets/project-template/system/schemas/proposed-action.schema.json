@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "campaign_id", "action_id", "account_id", "channel", "recipient", "canonical_message_id", "body", "approval_status", "execution_status", "sending_authorized"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "campaign_id": {"type": "string", "minLength": 1},
+    "action_id": {"type": "string", "minLength": 1},
+    "account_id": {"type": "string", "minLength": 1},
+    "channel": {"enum": ["gmail", "outlook", "manual_export"]},
+    "recipient": {"type": "string", "minLength": 1},
+    "subject": {"type": ["string", "null"]},
+    "canonical_message_id": {"type": "string", "minLength": 1},
+    "body": {"type": "string", "minLength": 1},
+    "approval_status": {"enum": ["pending", "approved", "rejected", "needs_changes"]},
+    "execution_status": {"enum": ["not_started", "draft_created", "manual_item_created", "held", "failed"]},
+    "sending_authorized": {"const": false}
+  }
+}
