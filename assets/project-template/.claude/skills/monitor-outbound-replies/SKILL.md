@@ -1,11 +1,11 @@
 ---
 name: monitor-outbound-replies
-description: Perform a read-only reply check for a prepared Outbound OS campaign through its configured Gmail or Outlook adapter, normalize matching evidence, and refresh local follow-up state. Never send, reply, or change mailbox content.
+description: Perform a read-only reply check for a prepared Outbound OS campaign through an available Gmail or Outlook capability. Never send, reply, or change mailbox content.
 ---
 
 # Monitor Outbound Replies
 
-Read the campaign's configured channels and proposed-action receipts. Use only an available selected mailbox adapter. Search narrowly by recorded destination, subject, draft/message identifiers, and timestamps; do not perform unrelated mailbox triage.
+Read the campaign's configured channels and proposed-action receipts. Use only an available selected mailbox capability. Search narrowly by recorded destination, subject, draft or message identifiers, and timestamps; do not perform unrelated mailbox triage.
 
 Normalize adapter results with:
 

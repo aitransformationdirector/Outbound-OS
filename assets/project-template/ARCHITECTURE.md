@@ -10,4 +10,6 @@ Outbound OS separates campaign intent, account evidence, canonical messaging, hu
 6. Approved actions are translated by a channel adapter without changing canonical copy.
 7. CRM exports include only conversation-backed records and do not mutate live systems.
 
+The project has two thin host entry points: `.agents/skills` for Codex and `.claude/skills` for Claude Code. Both use the same contracts, campaign state, and executable files under `system/runtime`; neither host owns campaign logic.
+
 Unknown evidence never silently fails a hard rule. Sending is always outside project authority.

@@ -5,10 +5,10 @@ This project turns a confirmed target-account brief into evidence-backed, review
 ## Start and continuity
 
 - At the beginning of every response, read `PROJECT_INPUT.json` and use `user_name` naturally at least once. Do not infer or substitute another name.
-- Before acting on `run`, verify that the current project root contains all three exact paths: `AGENTS.md`, `PROJECT_INPUT.json`, and `.agents/skills/run-outbound-campaign/SKILL.md`.
+- Before acting on `run`, verify that the current project root contains `AGENTS.md`, `CLAUDE.md`, `PROJECT_INPUT.json`, `system/runtime/campaign_engine.py`, and the runtime skill for the current host.
 - If any marker is absent from the current project root, do not research accounts and do not use a global skill or external template as a fallback. Tell the user by name that this task is not opened inside the generated project, show `project_root` from `PROJECT_INPUT.json` when available, and instruct them to add that exact folder as a local project and start a new task there.
-- The campaign runtime is bundled at `.agents/skills/run-outbound-campaign/SKILL.md`. Hidden paths may not appear in ordinary file searches. Check this exact path directly; if listing files, include hidden files. Never conclude that the runtime is missing from a search that excludes `.agents`.
-- When the user types exactly `run` and all project-root markers exist, read the bundled runtime skill directly, use the campaign ID and confirmed brief, and begin without repeating onboarding. If `$run-outbound-campaign` is discoverable, invoke it; otherwise follow the bundled file at the exact relative path.
+- Codex uses `.agents/skills/run-outbound-campaign/SKILL.md`; Claude uses `.claude/skills/run-outbound-campaign/SKILL.md`. Hidden paths may not appear in ordinary file searches. Check the applicable exact path directly and include hidden files in searches.
+- When the user types exactly `run` and all project-root markers exist, read the bundled skill for the current host, use the campaign ID and confirmed brief, and begin without repeating onboarding. Never substitute the other host's installation, a global skill, or an external template.
 - Continue automatically between the calibration review and complete preflight review. Stop only at those gates, for missing authority, or for a genuine blocker.
 - Report the current stage, completed and remaining account counts, and next automatic step at material checkpoints.
 

@@ -12,6 +12,7 @@ from pathlib import Path
 
 REQUIRED = (
     "AGENTS.md",
+    "CLAUDE.md",
     "START_HERE.md",
     "RUN.md",
     "PROJECT_INPUT.json",
@@ -26,12 +27,21 @@ REQUIRED = (
     "system/adapters/outlook.json",
     "system/adapters/manual_export.json",
     ".agents/skills/run-outbound-campaign/SKILL.md",
-    ".agents/skills/run-outbound-campaign/scripts/campaign_engine.py",
     ".agents/skills/sync-outbound-crm/SKILL.md",
-    ".agents/skills/sync-outbound-crm/scripts/crm_export.py",
     ".agents/skills/monitor-outbound-replies/SKILL.md",
-    ".agents/skills/monitor-outbound-replies/scripts/normalize_replies.py",
+    ".claude/skills/run-outbound-campaign/SKILL.md",
+    ".claude/skills/sync-outbound-crm/SKILL.md",
+    ".claude/skills/monitor-outbound-replies/SKILL.md",
+    "system/runtime/campaign_engine.py",
+    "system/runtime/crm_export.py",
+    "system/runtime/normalize_replies.py",
+    "system/runtime/execution-contract.md",
 )
+
+RUNTIME_SKILLS = {
+    "codex": ".agents/skills/run-outbound-campaign/SKILL.md",
+    "claude": ".claude/skills/run-outbound-campaign/SKILL.md",
+}
 
 
 def json_files(root: Path) -> list[Path]:
@@ -51,17 +61,25 @@ def validate(root: Path) -> list[str]:
     input_path = root / "PROJECT_INPUT.json"
     if input_path.is_file():
         payload = json.loads(input_path.read_text(encoding="utf-8"))
-        if payload.get("status") != "ready" or payload.get("next_prompt") != "run":
+        if payload.get("status") != "ready" or payload.get("next_prompt") not in {"run", "/run-outbound-campaign"}:
             errors.append("PROJECT_INPUT.json is not ready to run")
+        if payload.get("next_prompts") != {"codex": "run", "claude": "/run-outbound-campaign"}:
+            errors.append("PROJECT_INPUT.json lacks host-specific launch prompts")
         if not payload.get("campaign_id") or payload.get("brief", {}).get("confirmed") is not True:
             errors.append("PROJECT_INPUT.json lacks a confirmed campaign")
         if not payload.get("user_name") or not payload.get("brief", {}).get("team_profile", {}).get("user_name"):
             errors.append("PROJECT_INPUT.json lacks the preferred user name")
-        runtime_path = payload.get("runtime_skill_path")
-        if runtime_path != ".agents/skills/run-outbound-campaign/SKILL.md":
-            errors.append("PROJECT_INPUT.json has an invalid runtime skill path")
-        elif not (root / runtime_path).is_file():
-            errors.append("PROJECT_INPUT.json points to a missing bundled runtime skill")
+        if payload.get("supported_runtimes") != ["codex", "claude"]:
+            errors.append("PROJECT_INPUT.json must support codex and claude")
+        if payload.get("preferred_runtime") not in {"codex", "claude", "both"}:
+            errors.append("PROJECT_INPUT.json has an invalid preferred runtime")
+        runtime_paths = payload.get("runtime_skill_paths")
+        if runtime_paths != RUNTIME_SKILLS:
+            errors.append("PROJECT_INPUT.json has invalid runtime skill paths")
+        else:
+            for runtime_path in runtime_paths.values():
+                if not (root / runtime_path).is_file():
+                    errors.append(f"PROJECT_INPUT.json points to a missing bundled runtime skill: {runtime_path}")
     for adapter_id in ("gmail", "outlook", "manual_export"):
         path = root / "system/adapters" / f"{adapter_id}.json"
         if path.is_file():

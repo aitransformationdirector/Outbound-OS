@@ -6,6 +6,7 @@
 - Accounts: `{{ACCOUNT_COUNT}}`
 - Channels: `{{CHANNELS}}`
 
-Before typing `run`, confirm this task is opened inside the exact generated campaign folder and that `.agents/skills/run-outbound-campaign/SKILL.md` exists. Do not run from the original builder task or attach this folder there.
+Before launching, confirm the session is opened inside the exact generated campaign folder. Do not run from the original builder task or attach this folder there.
 
-When the correct local project is open, type exactly `run`.
+- **Codex:** confirm `.agents/skills/run-outbound-campaign/SKILL.md` exists, then type exactly `run`.
+- **Claude Code:** confirm `.claude/skills/run-outbound-campaign/SKILL.md` exists, then invoke `/run-outbound-campaign`.

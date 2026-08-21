@@ -1,0 +1,13 @@
+{
+  "name": "outbound-os",
+  "displayName": "Outbound OS",
+  "version": "3.0.0",
+  "description": "Create universal, evidence-backed outbound campaign projects from target-account lists.",
+  "author": {
+    "name": "Dean Hunt",
+    "email": "dean@tiki.com"
+  },
+  "homepage": "https://github.com/aitransformationdirector/Outbound-OS",
+  "repository": "https://github.com/aitransformationdirector/Outbound-OS",
+  "keywords": ["outbound", "sales", "campaigns", "account-research"]
+}
