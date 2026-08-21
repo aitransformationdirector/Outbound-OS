@@ -146,20 +146,30 @@ class BuilderTests(unittest.TestCase):
             brief_path = root / "brief.json"
             brief_path.write_text(json.dumps(brief()), encoding="utf-8")
             output = root / "Outbound OS Projects"
-            result = MODULE.build_project(source, brief_path, output)
+            result = MODULE.build_project(source, brief_path, output, "codex")
             project = Path(result["project_path"])
             self.assertTrue((project / "PROJECT_INPUT.json").is_file())
             self.assertTrue((project / ".agents/skills/run-outbound-campaign/SKILL.md").is_file())
+            self.assertTrue((project / ".claude/skills/run-outbound-campaign/SKILL.md").is_file())
+            self.assertTrue((project / "AGENTS.md").is_file())
+            self.assertTrue((project / "CLAUDE.md").is_file())
+            self.assertTrue((project / "system/runtime/campaign_engine.py").is_file())
             self.assertTrue(result["handoff"]["do_not_run_in_builder_task"])
             self.assertTrue(result["handoff"]["do_not_attach_folder_to_builder_task"])
             self.assertEqual(result["handoff"]["user_name"], "Alex")
+            self.assertEqual(result["supported_runtimes"], ["codex", "claude"])
+            self.assertEqual(result["preferred_runtime"], "codex")
             project_input = json.loads((project / "PROJECT_INPUT.json").read_text(encoding="utf-8"))
             self.assertEqual(project_input["user_name"], "Alex")
-            self.assertEqual(project_input["runtime_skill_path"], ".agents/skills/run-outbound-campaign/SKILL.md")
+            self.assertEqual(project_input["runtime_skill_paths"], {
+                "codex": ".agents/skills/run-outbound-campaign/SKILL.md",
+                "claude": ".claude/skills/run-outbound-campaign/SKILL.md",
+            })
+            self.assertEqual(project_input["next_prompts"], {"codex": "run", "claude": "/run-outbound-campaign"})
             self.assertIn("Alex", (project / "START_HERE.md").read_text(encoding="utf-8"))
             profiles = json.loads((output / "_shared/team-profiles.json").read_text(encoding="utf-8"))
             self.assertEqual(profiles["profiles"][0]["organization"], "Example Company")
-            resumed = MODULE.build_project(source, brief_path, output)
+            resumed = MODULE.build_project(source, brief_path, output, "codex")
             self.assertTrue(resumed["resumed"])
 
             campaign = result["campaign_id"]
@@ -170,7 +180,7 @@ class BuilderTests(unittest.TestCase):
                 {"message_id": "message-3", "account_id": "acct-three", "recipient": "https://example.com/contact", "subject": None, "body": "A reviewed message.", "channel": "manual_export"},
             ]
             messages.write_text("".join(json.dumps(row) + "\n" for row in message_rows), encoding="utf-8")
-            engine = project / ".agents/skills/run-outbound-campaign/scripts/campaign_engine.py"
+            engine = project / "system/runtime/campaign_engine.py"
             prepared = subprocess.run([sys.executable, str(engine), "--root", str(project), "prepare-actions", "--campaign", campaign, "--messages", str(messages)], text=True, capture_output=True, check=False)
             self.assertEqual(prepared.returncode, 0, prepared.stderr)
             actions = json.loads(prepared.stdout)["actions"]
@@ -186,14 +196,14 @@ class BuilderTests(unittest.TestCase):
                 json.dumps({"campaign_id": campaign, "account_id": "acct-one", "account_name": "Alpha", "relationship_status": "substantive_reply", "evidence": [{"message_id": "reply-1"}]}),
                 json.dumps({"campaign_id": campaign, "account_id": "acct-two", "account_name": "Beta", "relationship_status": "no_reply", "evidence": []}),
             ]) + "\n", encoding="utf-8")
-            crm = project / ".agents/skills/sync-outbound-crm/scripts/crm_export.py"
+            crm = project / "system/runtime/crm_export.py"
             exported = subprocess.run([sys.executable, str(crm), "--root", str(project), "--campaign", campaign], text=True, capture_output=True, check=False)
             self.assertEqual(exported.returncode, 0, exported.stderr)
             self.assertEqual(json.loads(exported.stdout), {"included": 1, "excluded": 1})
 
             replies = root / "replies.jsonl"
             replies.write_text(json.dumps({"adapter": "gmail", "account_id": "acct-one", "checked_at": "2026-08-20T10:00:00Z", "classification": "substantive_reply", "evidence": {"message_id": "reply-1"}}) + "\n", encoding="utf-8")
-            monitor = project / ".agents/skills/monitor-outbound-replies/scripts/normalize_replies.py"
+            monitor = project / "system/runtime/normalize_replies.py"
             normalized = subprocess.run([sys.executable, str(monitor), "--root", str(project), "--campaign", campaign, "--input", str(replies)], text=True, capture_output=True, check=False)
             self.assertEqual(normalized.returncode, 0, normalized.stderr)
 
@@ -208,6 +218,61 @@ class BuilderTests(unittest.TestCase):
             MODULE.build_project(second_source, second_brief, output)
             profiles = json.loads((output / "_shared/team-profiles.json").read_text(encoding="utf-8"))
             self.assertEqual({row["profile_name"] for row in profiles["profiles"]}, {"Primary team", "Another team"})
+
+    def test_claude_preference_changes_handoff_not_campaign_core(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            source = root / "accounts.csv"
+            source.write_text("name,website\nAlpha,alpha.example\n", encoding="utf-8")
+            brief_path = root / "brief.json"
+            brief_path.write_text(json.dumps(brief()), encoding="utf-8")
+            result = MODULE.build_project(source, brief_path, root / "projects", "claude")
+            project = Path(result["project_path"])
+            payload = json.loads((project / "PROJECT_INPUT.json").read_text(encoding="utf-8"))
+            self.assertEqual(payload["preferred_runtime"], "claude")
+            self.assertEqual(payload["next_prompt"], "/run-outbound-campaign")
+            self.assertEqual(payload["shared_runtime_path"], "system/runtime/campaign_engine.py")
+            self.assertIn("@AGENTS.md", (project / "CLAUDE.md").read_text(encoding="utf-8"))
+            self.assertIn("system/runtime/campaign_engine.py", (project / ".agents/skills/run-outbound-campaign/SKILL.md").read_text(encoding="utf-8"))
+            self.assertIn("system/runtime/campaign_engine.py", (project / ".claude/skills/run-outbound-campaign/SKILL.md").read_text(encoding="utf-8"))
+
+    def test_claude_plugin_and_codex_skill_share_builder(self) -> None:
+        manifest = json.loads((SKILL / ".claude-plugin/plugin.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["name"], "outbound-os")
+        self.assertEqual(manifest["version"], MODULE.BUILDER_VERSION)
+        claude_skill = (SKILL / "skills/new-campaign/SKILL.md").read_text(encoding="utf-8")
+        codex_skill = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("scripts/build_project.py", claude_skill)
+        self.assertIn("scripts/build_project.py", codex_skill)
+        self.assertIn("references/onboarding-workflow.md", claude_skill)
+        self.assertIn("references/onboarding-workflow.md", codex_skill)
+
+    def test_host_packages_do_not_duplicate_runtime_logic(self) -> None:
+        runtime = SKILL / "assets/project-template/system/runtime"
+        host_roots = [
+            SKILL / "assets/project-template/.agents/skills",
+            SKILL / "assets/project-template/.claude/skills",
+        ]
+        for filename in ("campaign_engine.py", "normalize_replies.py", "crm_export.py"):
+            shared = runtime / filename
+            self.assertTrue(shared.is_file())
+            lowered = shared.read_text(encoding="utf-8").casefold()
+            self.assertNotIn(".agents", lowered)
+            self.assertNotIn(".claude", lowered)
+            self.assertNotIn("codex", lowered)
+            self.assertNotIn("claude", lowered)
+            for host_root in host_roots:
+                self.assertEqual(list(host_root.rglob(filename)), [])
+
+    def test_invalid_runtime_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            source = root / "accounts.csv"
+            source.write_text("name,website\nAlpha,alpha.example\n", encoding="utf-8")
+            brief_path = root / "brief.json"
+            brief_path.write_text(json.dumps(brief()), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "Preferred runtime"):
+                MODULE.build_project(source, brief_path, root / "projects", "other")
 
     def test_empty_source_fails(self) -> None:
         with tempfile.TemporaryDirectory() as raw:

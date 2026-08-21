@@ -1,17 +1,16 @@
 ---
 name: run-outbound-campaign
-description: Execute a prepared universal Outbound OS campaign from its confirmed brief, researching and qualifying every account, producing two review gates, and creating only explicitly approved drafts or local actions. Do not use for campaign onboarding.
+description: Execute a prepared universal Outbound OS campaign from its confirmed brief, with evidence-backed qualification, review gates, and no automatic sending. Do not use for campaign onboarding.
 ---
 
 # Run Outbound Campaign
 
-This is the Codex entry point bundled inside the generated project. Before any work, verify the current project root contains `PROJECT_INPUT.json`, this exact relative file, and `system/runtime/campaign_engine.py`. If not, stop and direct the user to open the exact generated folder as a local Codex project; never fall back to a template or another installation.
+This is the Claude Code entry point bundled inside the generated project. Before any work, verify the current project root contains `CLAUDE.md`, `PROJECT_INPUT.json`, this exact relative file, and `system/runtime/campaign_engine.py`. If not, stop and direct the user to open the exact generated campaign folder; never fall back to another project, plugin, or template.
 
 Read `PROJECT_INPUT.json`, address the user by its `user_name` at least once in every response, then read the campaign state and [the shared execution contract](../../../system/runtime/execution-contract.md). Validate before work:
 
 ```bash
-python3 system/runtime/campaign_engine.py \
-  --root . validate --campaign "<campaign-id>"
+python3 system/runtime/campaign_engine.py --root . validate --campaign "<campaign-id>"
 ```
 
 ## Execute
@@ -24,7 +23,7 @@ python3 system/runtime/campaign_engine.py \
 6. Draft one versioned canonical message per actionable account.
 7. Create a three-account calibration review with varied account and rule outcomes.
 8. Apply feedback, run suppression checks, and create a complete preflight for all accounts.
-9. Convert approved messages to channel-neutral proposed actions. Use the selected adapter only after approval, preserve exact copy, and never send.
+9. Convert approved messages to channel-neutral proposed actions. Use a selected, available adapter only after approval, preserve exact copy, and never send.
 10. Produce CRM export records only for conversation-backed accounts.
 
-Use `prepare-actions` to create validated neutral action records from canonical messages. Adapters and safety requirements are defined in [the shared execution contract](../../../system/runtime/execution-contract.md).
+Use the shared runtime to create validated neutral action records. Adapter availability is host-specific; if a configured mailbox capability is unavailable, hold the action and offer `manual_export` without changing the canonical message.

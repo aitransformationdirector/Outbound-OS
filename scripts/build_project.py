@@ -21,11 +21,16 @@ from urllib.parse import urlparse
 from xml.etree import ElementTree as ET
 
 
-BUILDER_VERSION = "2.1.0"
+BUILDER_VERSION = "3.0.0"
 NAME_HEADERS = {"account", "account_name", "business_name", "company", "company_name", "name", "organisation", "organization", "publisher_name"}
 WEB_HEADERS = {"business_domain", "canonical_domain", "company_domain", "domain", "publisher_domain", "site", "url", "website", "website_url"}
 ALLOWED_CHANNELS = {"gmail", "outlook", "manual_export"}
 RULE_KINDS = {"must_match", "exclude", "prioritize"}
+RUNTIMES = {"codex", "claude", "both"}
+RUNTIME_SKILL_PATHS = {
+    "codex": ".agents/skills/run-outbound-campaign/SKILL.md",
+    "claude": ".claude/skills/run-outbound-campaign/SKILL.md",
+}
 SENSITIVE_KEY = re.compile(r"(?:api.?key|cookie|credential|password|secret|token)", re.I)
 
 
@@ -319,16 +324,18 @@ def save_team_profile(shared_root: Path, profile: dict[str, Any]) -> None:
     os.replace(temporary, path)
 
 
-def build_project(source: Path, brief_path: Path, output_root: Path) -> dict[str, Any]:
+def build_project(source: Path, brief_path: Path, output_root: Path, preferred_runtime: str = "both") -> dict[str, Any]:
     source = source.expanduser().resolve()
     brief_path = brief_path.expanduser().resolve()
     if not source.is_file() or not brief_path.is_file():
         raise ValueError("Source and confirmed brief files are required")
     brief = read_json(brief_path)
     validate_brief(brief)
+    if preferred_runtime not in RUNTIMES:
+        raise ValueError("Preferred runtime must be codex, claude, or both")
     accounts, audit = import_accounts(source)
     digest = source_hash(source)
-    fingerprint_payload = json.dumps({"builder_version": BUILDER_VERSION, "source_sha256": digest, "brief": brief}, sort_keys=True, ensure_ascii=False)
+    fingerprint_payload = json.dumps({"builder_version": BUILDER_VERSION, "source_sha256": digest, "brief": brief, "preferred_runtime": preferred_runtime}, sort_keys=True, ensure_ascii=False)
     fingerprint = hashlib.sha256(fingerprint_payload.encode()).hexdigest()
     date_label = dt.datetime.now().astimezone().date().isoformat()
     base_name = f"{slug(brief['campaign_name'])}-{date_label}"
@@ -371,18 +378,22 @@ def build_project(source: Path, brief_path: Path, output_root: Path) -> dict[str
             "created_at": now_iso(),
         })
         project_input = {
-            "schema_version": 1,
+            "schema_version": 2,
             "builder_version": BUILDER_VERSION,
             "status": "ready",
             "campaign_id": campaign_id,
             "campaign_name": brief["campaign_name"],
             "user_name": brief["team_profile"]["user_name"],
             "project_root": str(destination),
-            "runtime_skill_path": ".agents/skills/run-outbound-campaign/SKILL.md",
+            "supported_runtimes": ["codex", "claude"],
+            "preferred_runtime": preferred_runtime,
+            "runtime_skill_paths": RUNTIME_SKILL_PATHS,
+            "shared_runtime_path": "system/runtime/campaign_engine.py",
             "source": {"name": source.name, "sha256": digest},
             "brief": brief,
             "audit": audit,
-            "next_prompt": "run",
+            "next_prompt": "run" if preferred_runtime != "claude" else "/run-outbound-campaign",
+            "next_prompts": {"codex": "run", "claude": "/run-outbound-campaign"},
             "prepared_at": now_iso(),
         }
         write_json(temporary / "PROJECT_INPUT.json", project_input)
@@ -397,11 +408,11 @@ def build_project(source: Path, brief_path: Path, output_root: Path) -> dict[str
         for relative in ("START_HERE.md", "RUN.md"):
             render(temporary / relative, replacements)
         validator = temporary / "system/scripts/validate_system.py"
-        engine = temporary / ".agents/skills/run-outbound-campaign/scripts/campaign_engine.py"
+        engine = temporary / "system/runtime/campaign_engine.py"
         run_checked([sys.executable, str(validator), "--root", str(temporary)], temporary)
         run_checked([sys.executable, str(engine), "--root", str(temporary), "validate", "--campaign", campaign_id], temporary)
         receipt = {
-            "schema_version": 1,
+            "schema_version": 2,
             "builder_version": BUILDER_VERSION,
             "project_path": str(destination),
             "project_folder_name": destination.name,
@@ -410,9 +421,12 @@ def build_project(source: Path, brief_path: Path, output_root: Path) -> dict[str
             "input_fingerprint": fingerprint,
             "counts": audit,
             "channels": brief["channels"],
+            "supported_runtimes": ["codex", "claude"],
+            "preferred_runtime": preferred_runtime,
             "targeting_rules": brief["targeting_rules"],
             "built_at": now_iso(),
-            "next_prompt": "run",
+            "next_prompt": "run" if preferred_runtime != "claude" else "/run-outbound-campaign",
+            "next_prompts": {"codex": "run", "claude": "/run-outbound-campaign"},
             "handoff": {
                 "user_name": brief["team_profile"]["user_name"],
                 "must_open_as_local_project": True,
@@ -422,8 +436,11 @@ def build_project(source: Path, brief_path: Path, output_root: Path) -> dict[str
                 "project_folder_name": destination.name,
                 "required_markers": [
                     "AGENTS.md",
+                    "CLAUDE.md",
                     "PROJECT_INPUT.json",
                     ".agents/skills/run-outbound-campaign/SKILL.md",
+                    ".claude/skills/run-outbound-campaign/SKILL.md",
+                    "system/runtime/campaign_engine.py",
                 ],
             },
             "resumed": False,
@@ -447,7 +464,8 @@ def parser() -> argparse.ArgumentParser:
     build = commands.add_parser("build")
     build.add_argument("--source", required=True)
     build.add_argument("--brief", required=True)
-    build.add_argument("--output-root", default=str(Path.home() / "Desktop/Codex/Outbound OS Projects"))
+    build.add_argument("--output-root", default=str(Path.home() / "Desktop/Outbound OS Projects"))
+    build.add_argument("--preferred-runtime", choices=sorted(RUNTIMES), default="both")
     return root
 
 
@@ -459,7 +477,7 @@ def main() -> int:
             accounts, audit = import_accounts(source)
             print(json.dumps({"audit": audit, "sample": accounts[:5], "suggested_filters": recommendations(args.context, audit["available_columns"])}, indent=2, ensure_ascii=False))
         else:
-            result = build_project(Path(args.source), Path(args.brief), Path(args.output_root))
+            result = build_project(Path(args.source), Path(args.brief), Path(args.output_root), args.preferred_runtime)
             print(json.dumps(result, indent=2, ensure_ascii=False))
         return 0
     except (OSError, ValueError, json.JSONDecodeError, zipfile.BadZipFile) as exc:
